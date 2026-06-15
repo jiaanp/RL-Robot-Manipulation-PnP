@@ -1,0 +1,69 @@
+<mujoco model="config">
+
+    <!-- 编译器设置 -->
+    <!-- angle="radian" 表示角度单位为弧度 -->
+    <!-- meshdir="assets" 指定所有网格模型文件的目录 -->
+    <!-- autolimits="true" 自动根据模型参数推断关节的运动范围 -->
+    <compiler angle="radian" autolimits="true"/>
+
+    <!-- 物理仿真选项：仿真步长、重力、积分器、介质密度、介质粘度 -->
+    <!-- timestep 如果太小的话导致高速运动偏差大，一般 0.002 ~ 0.005 -->
+    <option timestep="0.004" gravity="0 0 -9.81" integrator="implicitfast" density="1.225" viscosity="1.8e-5"/>
+
+    <asset>
+        <material class="rizon4" name="black" rgba="0.033 0.033 0.033 1"/>  <!-- 接近黑色 -->
+        <material class="rizon4" name="jointgray" rgba="0.278 0.278 0.278 1"/>  <!-- 深灰色（可能用于关节）-->
+        <material class="rizon4" name="linkgray" rgba="0.82  0.82  0.82  1"/>  <!-- 浅灰色（可能用于连杆）-->
+        <material class="rizon4" name="urblue" rgba="0.49  0.678 0.8   1"/>  <!-- 蓝色（视觉识别色）-->
+
+        <material class="rizon4" name="white" rgba="0.86 0.86 0.86 1"/>  <!-- 亮银白 -->
+        <material class="rizon4" name="rizonblue" rgba="0.45 0.65 0.85 1"/>  <!-- 蓝色 -->
+
+        <material class="rizon4" name="red" rgba="1 0.25 0.2 1" specular="0" shininess="0" emission="0"/>  <!-- 淡红色 -->
+
+        <!--        <texture name="table_tex" type="2d" file="table.jpg" width="512" height="512"/>-->
+        <!--        <material name="table_mat" texture="table_tex" texrepeat="1 1" specular="0.1" shininess="0.5"/>-->
+        <material name="table_mat" rgba="0.55 0.27 0.07 1" specular="0.3" shininess="0.2"/>
+
+
+    <mesh file="../meshes/link0.obj"/>
+    <mesh file="../meshes/link1.obj"/>
+    <mesh file="../meshes/link2.obj"/>
+    <mesh file="../meshes/link3.obj"/>
+    <mesh file="../meshes/link4.obj"/>
+    <mesh file="../meshes/link5.obj"/>
+    <mesh file="../meshes/link6.obj"/>
+    <mesh file="../meshes/link7.obj"/>
+
+
+    <mesh name="link0_collision" file="../meshes/link0_collision.stl"/>
+    <mesh name="link1_collision" file="../meshes/link1_collision.stl"/>
+    <mesh name="link2_collision" file="../meshes/link2_collision.stl"/>
+    <mesh name="link3_collision" file="../meshes/link3_collision.stl"/>
+    <mesh name="link4_collision" file="../meshes/link4_collision.stl"/>
+    <mesh name="link5_collision" file="../meshes/link5_collision.stl"/>
+    <mesh name="link6_collision" file="../meshes/link6_collision.stl"/>
+    <mesh name="link7_collision" file="../meshes/link7_collision.stl"/>
+
+    </asset>
+
+    <default>
+
+        <default class="visual">
+            <!-- 视觉几何体属性，类型为 mesh，碰撞相关属性为0 -->
+            <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+        </default>
+
+        <default class="collision">
+            <geom type="capsule" group="3"/>  <!-- 碰撞几何体为胶囊体，属于碰撞组3 -->
+            <default class="eef_collision">   <!-- 针对机械臂末端执行器（eef）的碰撞形状 -->
+                <geom type="cylinder"/>       <!-- 末端执行器碰撞几何体类型为圆柱体 -->
+            </default>
+        </default>
+
+        <!-- 设置 site 的默认配置，中等灰色 带一点透明 -->
+        <site size="0.001" rgba="0.5 0.5 0.5 0.8" group="0"/>
+
+    </default>
+
+</mujoco>

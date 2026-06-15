@@ -1,0 +1,189 @@
+<mujoco model="rizon4">
+
+    <default> <!-- default start >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
+        <default class="rizon4">
+            <!-- specular 镜面反射强度：越大越亮，物体会有高光反光（类似金属、塑料） -->
+            <!-- shininess 光泽度：值越大，高光区域越集中、越锐利（类似抛光金属）；越小则高光模糊、散射（类似橡胶）-->
+            <material specular="0.5" shininess="0.25"/>
+            <!-- 设置默认旋转轴为 y 轴（0 1 0），范围为[-2π, 2π]， -->
+            <!-- armature ??? https://mujoco.readthedocs.io/en/latest/XMLreference.html#body-joint-armature-->
+            <joint axis="0 1 0" range="-6.28319 6.28319" armature="0.01" damping="0.01" frictionloss="0.01"/>
+
+
+            <!-- actuator settings >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
+            <!-- gaintype 固定，biastype 线性偏置，控制范围，增益和偏置参数，力范围 -->
+            <general gaintype="fixed" biastype="affine" ctrlrange="-6.2831 6.2831"
+                     gainprm="2000" biasprm="0 -2000 -400" forcerange="-150 150"/>
+
+            <default class="size3">
+                <default class="size3_limited">
+                    <joint range="-3.1415 3.1415"/>        <!-- 关节运动范围限制为[-π, π] -->
+                    <general ctrlrange="-3.1415 3.1415"/>  <!-- 控制范围同样限制为[-π, π] -->
+                </default>
+            </default>
+
+            <default class="size1">
+                <general gainprm="500" biasprm="0 -500 -100" forcerange="-28 28"/> <!-- 较小的增益，偏置和力范围 -->
+            </default>
+            <!-- actuator settings <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< -->
+
+        </default>
+    </default>  <!-- default end <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< -->
+
+
+    <worldbody>
+        <!-- 添加一个灯光，跟踪目标为 wrist_2_link，位置为(0, -1, 2) -->
+        <!--        <light name="spotlight" mode="targetbodycom" target="wrist_2_link" pos="0 -1 2"/>-->
+
+        <!-- 在机械臂 头顶上 添加一个 灯，加了这个灯之后会比较亮 -->
+        <light directional="true" diffuse="0.25 0.25 0.25" specular="0.15 0.15 0.15" pos="0 0 25.0" dir="0 0 -1"
+               castshadow="false"/>
+
+        <!--        <light directional="true" diffuse="0.6 0.6 0.6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1"/>-->
+
+        <!--        <camera name="fixed" pos="0 -3.0 0.517318010072385" xyaxes="1 0 0 0 0 1"/>-->
+        <!--        <camera name="track" mode="trackcom" pos="0 -3.0 0.517318010072385" xyaxes="1 0 0 0 0 1"/>-->
+        <body name="base" pos="0 0 0" childclass="rizon4">
+
+            <geom type="cylinder" size="0.1 0.05" pos="0 0 -0.05" material="white" class="visual"/>
+            <site name="site_base" pos="0 0 0" size="0.05" type="sphere" rgba="1 0 0 1"/>
+            <!-- 基座的位置，quat 四元数 1000表示不旋转，childclass 表示这个 body 以及后面的子类全都使用 rizon4 -->
+            <!--            pos="0 0 0.01731801007238498"-->
+            <body name="root" pos="0 0 0.01731801007238498" quat="0.7071 0.0 0.0 0.7071">
+                <!--            <freejoint name="root"/>-->
+                <!-- 设置 基座 的 视觉几何体 和 碰撞几何体-->
+                <geom type="mesh" mesh="link0_collision" class="collision"/>
+                <geom type="mesh" mesh="link0" class="visual" material="white"/>
+
+
+
+                <!--            <site name="imu" size="0.01" pos="0 0 0"/>-->
+
+                <!-- 设置 link1 : 相对于 root 原点 z 轴上升 0.155, 绕 z 轴旋转 180 度 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
+                <body name="link1" pos="0 0 0.155" quat="0 0 0 -1">
+                    <!-- 中心位置，质量大小，转动惯量-->
+                    <inertial pos="0 0.01 0.15" mass="3.7" diaginertia="0.03 0.03 0.01"/>
+                    <!-- 旋转中心就是这个 body 的坐标原点，z 轴旋转，旋转角度范围 大概是 -160° 到 +160°，最大扭矩 正负123-->
+                    <joint name="joint1" pos="0 0 0" axis="0 0 1" range="-2.7925 2.7925" actuatorfrcrange="-123 123"/>
+                    <!-- 设置 link1 的 视觉几何体 和 碰撞几何体-->
+                    <geom type="mesh" mesh="link1_collision" class="collision"/>
+                    <geom type="mesh" mesh="link1" class="visual" material="white"/>
+
+
+                    <!-- 设置 link2 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
+                    <body name="link2" pos="0 0.03 0.21">
+                        <!-- 中心位置，质量大小，转动惯量-->
+                        <inertial pos="0 0.04 0.1" mass="2.7" diaginertia="0.02 0.02 1e-05"/>
+                        <joint name="joint2" pos="0 0 0" axis="0 1 0" range="-2.2689 2.2689"
+                               actuatorfrcrange="-123 123"/>
+                        <geom type="mesh" mesh="link2_collision" class="collision"/>
+                        <geom type="mesh" mesh="link2" class="visual" material="white"/>
+
+
+                        <!-- 设置 link3 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
+                        <body name="link3" pos="0 0.035 0.205">
+                            <inertial pos="-0.01 0 0.13" mass="2.4" diaginertia="0.01 0.01 1e-05"/>
+                            <joint name="joint3" pos="0 0 0" axis="0 0 1" range="-2.9671 2.9671"
+                                   actuatorfrcrange="-64 64"/>
+                            <geom type="mesh" mesh="link3_collision" class="collision"/>
+                            <geom type="mesh" mesh="link3" class="visual" material="white"/>
+
+                            <!-- 设置 link4 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
+                            <body name="link4" pos="-0.02 -0.03 0.19" quat="0 0 0 -1">
+                                <inertial pos="-0.01 0.03 0.1" mass="2.4" diaginertia="0.02 0.02 1e-05"/>
+                                <joint name="joint4" pos="0 0 0" axis="0 1 0" range="-1.8675 2.6878"
+                                       actuatorfrcrange="-64 64"/>
+                                <geom type="mesh" mesh="link4_collision" class="collision"/>
+                                <geom type="mesh" mesh="link4" class="visual" material="white"/>
+
+                                <!-- 设置 link5 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
+                                <body name="link5" pos="-0.02 0.025 0.195" quat="0 0 0 -1">
+                                    <inertial pos="0 0 0.13" mass="2.4" diaginertia="0.01 0.01 1e-06"/>
+                                    <joint name="joint5" pos="0 0 0" axis="0 0 1" range="-2.9671 2.9671"
+                                           actuatorfrcrange="-39 39"/>
+                                    <geom type="mesh" mesh="link5_collision" class="collision"/>
+                                    <geom type="mesh" mesh="link5" class="visual" material="white"/>
+
+                                    <!-- 设置 link6 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
+                                    <body name="link6" pos="0 0.03 0.19">
+                                        <inertial pos="-0.01 0.06 0.07" quat="0.998506 0 0.05464 0" mass="2.1"
+                                                  diaginertia="0.0101098 0.01 0.000890228"/>
+                                        <joint name="joint6" pos="0 0 0" axis="0 1 0" range="-1.3963 4.5379"
+                                               actuatorfrcrange="-39 39"/>
+                                        <geom type="mesh" mesh="link6_collision" class="collision"/>
+                                        <geom type="mesh" mesh="link6" class="visual" material="white"/>
+
+                                        <!-- 设置 link7 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
+                                        <body name="link7" pos="-0.055 0.07 0.11" quat="0.707107 0 -0.707107 0">
+                                            <inertial pos="0 0 0.03" mass="0.8" diaginertia="1e-06 1e-06 1e-06"/>
+                                            <joint name="joint7" pos="0 0 0" axis="0 0 1" range="-2.9671 2.9671"
+                                                   actuatorfrcrange="-39 39"/>
+                                            <geom type="mesh" mesh="link7_collision" class="collision"/>
+                                            <geom type="mesh" mesh="link7" class="visual" material="white"/>
+
+                                            <site name="site_ee" pos="0 0 0" size="0.1"
+                                                      type="box" rgba="1 0 0 1"/>
+                                            <!-- 腕部的相机 -->
+                                            <camera name="cam_wrist" pos="0.1 0 0.05"
+                                                    quat="0 0 1 0" fovy="130"/>
+
+                                            <!-- 设置 end-effect: 扁平推板，更适合推动方块 -->
+                                            <body name="eef">
+                                                <!-- 短连杆 -->
+                                                <geom name="eef_rod" type="cylinder" fromto="0 0 0  0 0 0.08"
+                                                      size="0.012" material="white"/>
+                                                <geom name="push_plate" type="box" size="0.01 0.05 0.02"
+                                                      pos="0 0 0.09" rgba="0.8 0.2 0.2 1" mass="0.1"
+                                                      friction="0.8 0.005 0.0001" contype="1" conaffinity="1"/>
+                                                <site name="eef" pos="0 0 0.11" size="0.02" type="sphere" rgba="1 0 1 1"/>
+                                            </body>  <!--末端执行器-->
+                                        </body> <!-- link7 -->
+                                    </body> <!-- link6 -->
+                                </body> <!-- link5 -->
+                            </body> <!-- link4 -->
+                        </body> <!-- link3 -->
+                    </body> <!-- link2 -->
+                </body> <!-- link1 -->
+            </body> <!-- link0 -->
+        </body>
+
+        <body name="cube" pos="-0.5 0.2 0.051">
+            <joint name="cube_free" type="free" damping="0.2"/>
+            <geom name="cube_geom" type="box" size="0.05 0.05 0.05" mass="0.5" rgba="0.34 0.34 0.34 1"
+                friction="1.0 0.005 0.0001" contype="1" conaffinity="1"/>
+        </body>
+    </worldbody>
+
+
+    <actuator>
+        <!-- 位置控制执行器：gainprm=Kp, biasprm=[0, -Kp, -Kd]，输出目标关节角度 -->
+        <general name="joint1_act" joint="joint1" class="rizon4" gainprm="2000" biasprm="0 -2000 -400" ctrlrange="-2.7925 2.7925" forcerange="-123 123"/>
+        <general name="joint2_act" joint="joint2" class="rizon4" gainprm="2000" biasprm="0 -2000 -400" ctrlrange="-2.2689 2.2689" forcerange="-123 123"/>
+        <general name="joint3_act" joint="joint3" class="rizon4" gainprm="1000" biasprm="0 -1000 -200" ctrlrange="-2.9671 2.9671" forcerange="-64 64"/>
+        <general name="joint4_act" joint="joint4" class="rizon4" gainprm="1000" biasprm="0 -1000 -200" ctrlrange="-1.8675 2.6878" forcerange="-64 64"/>
+        <general name="joint5_act" joint="joint5" class="rizon4" gainprm="500"  biasprm="0 -500 -100"  ctrlrange="-2.9671 2.9671" forcerange="-39 39"/>
+        <general name="joint6_act" joint="joint6" class="rizon4" gainprm="500"  biasprm="0 -500 -100"  ctrlrange="-1.3963 4.5379" forcerange="-39 39"/>
+        <!-- joint7 已锁定，不再作为独立执行器 -->
+    </actuator>
+
+
+    <!-- 锁定 joint7: 固定在0位 -->
+    <equality>
+        <joint joint1="joint7" polycoef="0 1 0 0 0"/>
+    </equality>
+
+    <sensor>
+        <jointpos name="jp1" joint="joint1"/>
+        <jointpos name="jp2" joint="joint2"/>
+        <jointpos name="jp3" joint="joint3"/>
+        <jointpos name="jp4" joint="joint4"/>
+        <jointpos name="jp5" joint="joint5"/>
+        <jointpos name="jp6" joint="joint6"/>
+    </sensor>
+
+    <!--    <keyframe>-->
+    <!--        <key name="home" qpos="-1.5708 -1.5708 1.5708 -1.5708 -1.5708 0 0"-->
+    <!--             ctrl="-1.5708 -1.5708 1.5708 -1.5708 -1.5708 0 0"/>-->
+    <!--    </keyframe>-->
+
+</mujoco>

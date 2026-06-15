@@ -1,0 +1,61 @@
+<mujoco model="rizon4 scene">
+
+    <include file="config.xml"/>
+
+    <!-- 引入 机械臂 的主体定义 -->
+    <include file="rizon4.xml"/>
+    
+    <!--  这个节点其实是为了在启动仿真时，摄像机自动对准机器人-->
+    <!--  我的机器人模型大约在 x=0.3, y=0, z=0.4 这个位置，而且整体大概是 0.8 米大小，MuJoCo按这个范围来显示它。-->
+    <statistic center="0.3 0 0.4" extent="1.8"/>
+
+
+    <!--  下面的内容主要定义了 头灯、天空、地面 的材质、颜色等-->
+
+
+    <!-- 可视化设置 -->
+    <visual>
+        <!-- 设置主光源（头灯） -->
+        <!-- diffuse: 漫反射光颜色， 漫反射是指：光打到物体表面，会根据材质扩散反射。这个参数决定“被照亮”的程度 -->
+        <!-- ambient: 环境光颜色，即使某个部位没有直接被灯光照到，也会有一点亮，数值很小，表示环境光很弱（场景不会太亮） -->
+        <!-- specular: 高光反射，高光是金属、塑料等材质表面会出现的那种“亮点”，设置为 0 表示关闭高光反射（看起来会更柔和，不会反光） -->
+        <headlight diffuse="0.6 0.6 0.6" ambient="0.1 0.1 0.1" specular="0 0 0"/>
+
+        <!-- 设置雾效颜色， rgba: 红绿蓝透明度 -->
+        <rgba haze="0.15 0.25 0.35 1"/>
+
+        <!--    默认的摄像机视角（也就是你打开模拟器看到的初始画面视角），设置了方位角和俯仰角-->
+        <global azimuth="120" elevation="-20"/>
+    </visual>
+
+    <!-- 资源部分：贴图、材质 -->
+    <asset>
+        <!-- 设置天空贴图，内置渐变 -->
+        <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+
+        <!-- 设置地面贴图，内置蓝灰色调的格子棋盘格 -->
+        <texture type="2d" name="groundplane" builtin="checker"
+                 mark="edge"
+                 rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3"
+                 markrgb="0.8 0.8 0.8"
+                 width="300" height="300"/>
+
+        <!-- 地面材质，使用上述棋盘纹理，reflectance 用来控制反光 -->
+        <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0"/>
+    </asset>
+
+    <!-- 世界场景设置 -->
+    <worldbody>
+        <!-- 添加一个观察总体的相机，这个相机 fovy 必须使用 54.225，否则看到的全是 绿色 -->
+<!--        <camera name="fixed_cam" pos="0 2 2" mode="fixed" euler="0 0 0" fovy="54.225"/>-->
+<!--        <camera name="fixed_cam" pos="0.019 2.416 2.186" xyaxes="-1.000 0.019 0.000 -0.013 -0.666 0.746" fovy="54.225"/>-->
+
+        <!-- 添加一个方向光 -->
+        <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
+
+        <!-- 添加地面几何体：一个平面 -->
+        <geom name="floor" size="0 0 0.05" type="plane" material="groundplane" friction="1.2 0.05 0.01"/>
+
+    </worldbody>
+
+</mujoco>
