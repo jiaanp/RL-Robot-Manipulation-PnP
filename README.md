@@ -115,6 +115,48 @@ PHASES = [
 | curriculum | 500,000 | ~50% | Early version |
 | fast | incomplete | — | — |
 
+---
+
+## Rizon4 Push — PPO
+
+PPO-based push-block task on Rizon4 robot arm with optimized reward function.
+
+[中文版](README_CN.md#rizon4-push--ppo)
+
+### Structure
+
+```
+└── rizon4_push/
+    ├── rizon4_push.py            # Environment (XarmEnv + train_ppo helper)
+    ├── train_v6_reward.py        # Training with optimized reward
+    └── description/              # URDF/MJCF + meshes (Rizon4 model)
+```
+
+### Training
+
+```bash
+cd rizon4_push
+python train_v6_reward.py
+```
+
+Config: PPO, 32 parallel envs, 6M timesteps, reward optimization for push task.
+
+### Key Reward Design (v6)
+
+| Component | Description |
+| --- | --- |
+| Push activation | Soft exponential threshold (replaces hard 12cm gate) |
+| Proximity bonus | Reward block approaching target, bridges push→success gap |
+| Push weight | 15→25, encouraging aggressive pushing |
+
+### Results
+
+| Version | Success Rate |
+| --- | --- |
+| v6_reward (initial) | ~70% |
+| v6_reward (continued 800k) | ~90%+ |
+
+
 ## Success Rate Benchmark (TQC+HER vs SAC+HER)
 
 | Environment | TQC+HER | SAC+HER |

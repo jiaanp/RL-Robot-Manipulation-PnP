@@ -115,6 +115,48 @@ PHASES = [
 | curriculum | 500,000 | ~50% | 早期版本 |
 | fast | 未完成 | — | 训练中断 |
 
+---
+
+## Rizon4 推方块 — PPO
+
+使用 PPO 算法在 Rizon4 机械臂上实现推方块任务，v6 版本优化了奖励函数。
+
+[English](README.md#rizon4-push--ppo)
+
+### 结构
+
+```
+└── rizon4_push/
+    ├── rizon4_push.py            # 环境代码 (XarmEnv + train_ppo)
+    ├── train_v6_reward.py        # 优化奖励函数的训练脚本
+    └── description/              # URDF/MJCF + mesh 文件 (Rizon4 模型)
+```
+
+### 训练
+
+```bash
+cd rizon4_push
+python train_v6_reward.py
+```
+
+配置：PPO，32 并行环境，600 万步，针对推方块任务的奖励优化。
+
+### v6 奖励设计要点
+
+| 改动 | 说明 |
+| --- | --- |
+| Push 激活 | 硬门槛 12cm → 指数平滑，不再卡激活条件 |
+| Proximity 奖励 | 方块靠近目标即给分，填补推动→成功之间的空白 |
+| Push 权重 | 15→25，动作惩罚减半，鼓励积极推动 |
+
+### 结果
+
+| 版本 | 成功率 |
+| --- | --- |
+| v6_reward (初始) | ~70% |
+| v6_reward (续训 80 万步) | ~90%+ |
+
+
 ## 成功率对比 (TQC+HER vs SAC+HER)
 
 | 环境 | TQC+HER | SAC+HER |
